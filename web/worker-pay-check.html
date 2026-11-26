@@ -3,70 +3,239 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<style>html{color-scheme:light}body{margin:0;font:14px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
 <title>Worker Pay Check</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Mono:wght@400;600&family=Inter:wght@400;500;600&display=swap">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&display=swap">
 <style>
-/* Layout: one phone column. Question, four inputs, the answer printed like a pay stub line, then what to keep and what to do. Same family as Shift Change Texts, seen from the worker's side. */
-:root{--bg:#eef0ec;--fg:#16201a;--muted:#55605a;--line:#cdd6cf;--stub:#ffffff;--green:#1d6b4a;--on-green:#ffffff;--field:#ffffff;--warn:#8a5a00;
---display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;--body:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;--mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#111712;--fg:#e7ede8;--muted:#9aa89f;--line:#2b3630;--stub:#19211c;--green:#6fd3a5;--on-green:#08201a;--field:#17201b;--warn:#e7b65c;color-scheme:dark}}
-:root[data-theme="dark"]{--bg:#111712;--fg:#e7ede8;--muted:#9aa89f;--line:#2b3630;--stub:#19211c;--green:#6fd3a5;--on-green:#08201a;--field:#17201b;--warn:#e7b65c;color-scheme:dark}
+:root{--bg:#ffffff;--fg:#000000;--dim:#5e5e5e;--faint:#e9e9e9;--inv-bg:#000000;--inv-fg:#ffffff}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#000000;--fg:#ffffff;--dim:#a6a6a6;--faint:#1c1c1c;--inv-bg:#ffffff;--inv-fg:#000000;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#000000;--fg:#ffffff;--dim:#a6a6a6;--faint:#1c1c1c;--inv-bg:#ffffff;--inv-fg:#000000;color-scheme:dark}
 *{box-sizing:border-box}
-body{background:var(--bg);color:var(--fg);font:400 16px/1.5 var(--body);padding-block:28px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-main{max-width:640px;margin:0 auto;display:grid;gap:30px;min-width:0}
-section{display:grid;gap:14px;min-width:0}
-h1{font:700 clamp(40px,10vw,58px)/.98 var(--display);margin:0;text-wrap:balance}
-h2{font:700 26px/1.1 var(--display);margin:0}
-p{margin:0;max-width:62ch}
-.muted{color:var(--muted)}.small{font-size:14px}
-a{color:inherit;text-underline-offset:3px}
-label{display:grid;gap:5px;font-size:14px;font-weight:500;min-width:0}
-input,select{font:400 16px var(--body);color:inherit;width:100%;min-width:0;padding:11px 12px;border:1px solid var(--line);border-radius:3px;background:var(--field)}
-.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
-.check{display:flex;gap:10px;align-items:center;font-weight:400;font-size:15px}
-.check input{width:20px;height:20px;flex:none;accent-color:var(--green)}
-button{font:500 15px var(--body);color:inherit;cursor:pointer;border:1px solid var(--fg);background:transparent;padding:8px 14px;border-radius:3px;min-height:42px}
-:focus-visible{outline:3px solid var(--green);outline-offset:2px}
-.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
-.tag{font:600 12px/1.4 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--green)}
-.stub{background:var(--stub);border:1px solid var(--line);border-left:6px solid var(--green);padding:20px 18px;display:grid;gap:10px;font-family:var(--mono)}
-.stub .lbl{color:var(--muted);font-size:14px}
-.amt{font:600 52px/1 var(--mono);color:var(--green);font-variant-numeric:tabular-nums}
-.why{font:400 15px/1.5 var(--body)}
-.warn{font:400 15px/1.5 var(--body);color:var(--warn)}
-ul{margin:0;padding-left:20px;display:grid;gap:8px;max-width:62ch}
+html{background:var(--bg);-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--fg);font:400 clamp(18px,1.5vw,21px)/1.42 "Inter Tight","Helvetica Neue",Helvetica,Arial,sans-serif;letter-spacing:-.011em;margin:0;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));-webkit-font-smoothing:antialiased}
+::selection{background:var(--fg);color:var(--bg)}
+.wrap{max-width:1280px;margin:0 auto}
+a{color:inherit;text-underline-offset:.18em;text-decoration-thickness:1px}
+h1,h2,h3,h4{font-weight:600;margin:0;text-wrap:balance}
+h1{font-size:clamp(54px,12.5vw,188px);line-height:.86;letter-spacing:-.058em}
+h2{font-size:clamp(40px,7.4vw,112px);line-height:.9;letter-spacing:-.05em}
+h3{font-size:clamp(28px,3.8vw,52px);line-height:.98;letter-spacing:-.035em}
+h4{font-size:clamp(21px,2vw,26px);line-height:1.1;letter-spacing:-.02em}
+p{margin:0;max-width:38ch}
+.lede{font-size:clamp(23px,2.7vw,36px);line-height:1.14;letter-spacing:-.025em;max-width:26ch}
+.dim{color:var(--dim)}
+.small{font-size:15px;line-height:1.4;letter-spacing:0}
+.stack{display:grid;gap:clamp(20px,3vw,36px)}
+.row{display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:clamp(28px,5vw,72px)}
+.grid2>*,.stack>*{min-width:0}
+header.top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-block:18px calc(18px + 0px);font-weight:500}
+header.top .name{font-size:19px;letter-spacing:-.02em;text-decoration:none}
+.hero{padding-block:clamp(48px,11vw,170px) clamp(40px,8vw,120px);display:grid;gap:clamp(24px,4vw,48px)}
+section.band{border-top:1px solid var(--fg);padding-block:clamp(56px,10vw,150px);display:grid;gap:clamp(24px,4vw,48px)}
+footer.end{border-top:1px solid var(--fg);padding-block:28px 48px;display:flex;flex-wrap:wrap;gap:12px 28px;justify-content:space-between;font-size:15px}
+hr{border:0;border-top:1px solid var(--fg);margin:0}
+/* reveal */
+[data-reveal]{transition:transform .9s cubic-bezier(.2,.7,.1,1)}
+[data-reveal].armed{transform:translateY(36px)}
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5em;min-height:56px;padding:0 26px;border:1.5px solid var(--fg);background:transparent;color:var(--fg);
+  font-family:inherit;font-weight:500;font-size:clamp(18px,1.6vw,21px);line-height:1;letter-spacing:-.015em;text-decoration:none;cursor:pointer;border-radius:0;transition:background .14s,color .14s}
+.btn:hover,.btn:focus-visible,.btn.solid{background:var(--fg);color:var(--bg)}
+.btn.solid:hover{background:transparent;color:var(--fg)}
+.btn:active{transform:translateY(1px)}
+button{font-family:inherit}
+:focus-visible{outline:2px solid var(--fg);outline-offset:3px}
+/* big choice rows */
+.opts{display:grid;border-top:1px solid var(--fg)}
+.opts>button{all:unset;box-sizing:border-box;cursor:pointer;display:flex;justify-content:space-between;align-items:baseline;gap:16px;border-bottom:1px solid var(--fg);
+  padding:clamp(14px,2vw,22px) 0;font-weight:600;font-size:clamp(26px,3.6vw,48px);line-height:1;letter-spacing:-.035em;transition:background .14s,color .14s,padding .2s}
+.opts>button::after{content:attr(data-k);font-size:15px;font-weight:500;letter-spacing:0;opacity:.55}
+.opts>button:hover,.opts>button:focus-visible{background:var(--fg);color:var(--bg);padding-left:14px;padding-right:14px;outline:none}
+.opts>button[aria-pressed="true"]{background:var(--fg);color:var(--bg);padding-left:14px;padding-right:14px}
+.opts.small>button{font-size:clamp(20px,2.2vw,28px)}
+/* fields */
+.field{display:grid;gap:8px}
+.field>span{font-size:16px;font-weight:500;color:var(--dim)}
+.field input,.field select,.field textarea{width:100%;min-width:0;border:0;border-bottom:2px solid var(--fg);border-radius:0;background:transparent;color:var(--fg);padding:6px 0 10px;
+  font-family:inherit;font-weight:600;font-size:clamp(28px,3.6vw,48px);line-height:1.05;letter-spacing:-.035em;outline:none;-webkit-appearance:none;appearance:none}
+.field textarea{font-size:clamp(22px,2.4vw,30px);line-height:1.2;resize:vertical;min-height:3.6em}
+.field input::placeholder,.field textarea::placeholder{color:var(--dim);opacity:.6}
+.field input:focus,.field select:focus,.field textarea:focus{border-bottom-width:5px;padding-bottom:7px}
+input[type=range]{width:100%;accent-color:var(--fg)}
+input[type=checkbox]{accent-color:var(--fg);width:22px;height:22px}
+/* numbers */
+.num{font-weight:600;font-size:clamp(84px,19vw,280px);line-height:.82;letter-spacing:-.065em;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:clip}
+.num.mid{font-size:clamp(56px,10vw,150px)}
+/* rows that invert */
+ul.rows{list-style:none;margin:0;padding:0;border-top:1px solid var(--fg)}
+ul.rows>li{border-bottom:1px solid var(--fg);display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:baseline;padding:18px 0;transition:background .14s,color .14s,padding .2s}
+ul.rows>li:hover{background:var(--fg);color:var(--bg);padding-left:14px;padding-right:14px}
+ul.rows>li:hover .dim{color:inherit;opacity:.7}
+ul.rows>li>a{grid-column:1/-1}
+/* box that inverts */
+.inv{background:var(--fg);color:var(--bg)}
+.inv .dim{color:inherit;opacity:.7}
+.inv .btn{border-color:var(--bg);color:var(--bg)}
+.inv .btn:hover{background:var(--bg);color:var(--fg)}
+.boxed{border:1.5px solid var(--fg);padding:clamp(20px,3vw,36px)}
+/* theme toggle */
+.theme{all:unset;cursor:pointer;font-weight:500;font-size:16px;border-bottom:1px solid currentColor;line-height:1.3}
+@media (prefers-reduced-motion:reduce){[data-reveal],[data-reveal].armed{transform:none;transition:none}}
+@media (max-width:600px){header.top{padding-block:14px}.btn{width:100%}}
+
+
+[hidden]{display:none!important}
+header.top nav{gap:20px}
+header.top .btn{min-height:44px;padding:0 18px;font-size:17px;width:auto}
+.hero{padding-block:clamp(20px,4.5vw,60px) clamp(48px,8vw,110px);gap:clamp(16px,2.4vw,28px)}
+.hero h1{font-size:clamp(46px,7.6vw,118px);line-height:.9;max-width:15ch}
+.hero .sub{font-size:clamp(19px,1.8vw,23px);color:var(--dim);max-width:none}
+.calc{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,470px);gap:clamp(28px,5vw,80px);align-items:start;margin-top:clamp(4px,1.6vw,20px)}
+.ask{display:grid;gap:clamp(22px,3vw,36px);min-width:0}
+.ask h2{font-size:clamp(28px,3.8vw,52px);line-height:.98;letter-spacing:-.035em}
+.res{position:sticky;top:20px;display:grid;gap:14px;min-width:0}
+@media (max-width:900px){.calc{grid-template-columns:minmax(0,1fr)}.res{position:static;order:-1}}
+/* the pay stub */
+.stub{--p:clamp(18px,3vw,30px);border:1.5px solid var(--fg);padding:var(--p);display:grid;gap:14px;font-variant-numeric:tabular-nums;min-width:0}
+.stub .head{display:flex;justify-content:space-between;gap:12px;font-size:14px;color:var(--dim);border-bottom:1px solid var(--fg);padding-bottom:10px}
+.stub .line{display:flex;gap:10px;align-items:baseline;font-size:clamp(18px,1.8vw,22px);min-width:0}
+.stub .line>span:first-child{min-width:0}
+.stub .line .dots{flex:1;border-bottom:2px dotted var(--fg);transform:translateY(-5px);min-width:20px}
+.stub .line.item{font-weight:600}
+.stub .line.sm{font-size:16px;color:var(--dim)}
+.stub .line.sm .dots{border-color:var(--dim)}
+.stub.zero .line.item>span:first-child{text-decoration:line-through;text-decoration-thickness:2px}
+.stub .tot{display:grid;gap:4px;margin:0 calc(var(--p)*-1) calc(var(--p)*-1);padding:16px var(--p) var(--p);border-top:1.5px solid var(--fg)}
+.stub:not(.zero) .tot{background:var(--fg);color:var(--bg)}
+.stub .tot span{font-size:15px;opacity:.75}
+.stub .total{font-weight:700;font-size:clamp(60px,9vw,124px);line-height:.88;letter-spacing:-.06em;text-align:right;white-space:nowrap}
+#why{font-size:clamp(18px,1.6vw,21px);line-height:1.3;max-width:none}
+/* inputs */
+.dates{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));gap:22px}
+.dates .field input{font-size:clamp(24px,2.5vw,34px)}
+.checks{border-top:1px solid var(--fg)}
+.check{display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:center;padding:16px 0;border-bottom:1px solid var(--fg);cursor:pointer;
+  font-weight:500;font-size:clamp(18px,1.6vw,21px);line-height:1.25;transition:background .14s,color .14s,padding .2s}
+.check input{-webkit-appearance:none;appearance:none;width:30px;height:30px;margin:0;border:2px solid currentColor;border-radius:0;background:transparent;display:grid;place-content:center;cursor:pointer}
+.check input:checked{background:currentColor}
+.check input:checked::after{content:"";width:13px;height:7px;border-left:3px solid var(--bg);border-bottom:3px solid var(--bg);transform:translate(0,-2px) rotate(-45deg)}
+.check:hover{background:var(--fg);color:var(--bg);padding-left:14px;padding-right:14px}
+.check:hover input:checked::after{border-color:var(--fg)}
+.check:has(input:checked){font-weight:600}
+.warn{border:1.5px solid var(--fg);padding:16px 18px;font-weight:500;max-width:none}
+/* lower */
+ul.rows>li>span:first-child{font-size:clamp(21px,2vw,26px);font-weight:500;letter-spacing:-.02em;line-height:1.2}
+.tail{display:grid;gap:22px;justify-items:start}
+/* phone: the stub line follows you while you pick */
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:20;display:none;align-items:baseline;gap:10px;
+  padding:14px max(16px,env(safe-area-inset-right,0px)) calc(14px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));
+  background:var(--fg);color:var(--bg);text-decoration:none;font-variant-numeric:tabular-nums}
+.bar.on{display:flex}
+.bar span{font-size:17px;font-weight:500;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar i{flex:1;border-bottom:2px dotted currentColor;transform:translateY(-5px);min-width:16px}
+.bar b{font-size:30px;font-weight:700;letter-spacing:-.04em;white-space:nowrap}
 </style>
 </head>
 <body>
-<main>
-<section>
-  <div class="top"><span class="tag">NYC fast food · Fair Workweek</span><button type="button" id="lang"></button></div>
-  <h1 id="h1"></h1>
-  <p class="muted" id="lede"></p>
-</section>
-<section>
-  <label id="l-what"><span id="t-what"></span><select id="kind"></select></label>
-  <div class="row">
-    <label><span id="t-told"></span><input type="date" id="told"></label>
-    <label><span id="t-first"></span><input type="date" id="first"></label>
+
+<div class="wrap">
+<header class="top"><a class="name" href="#top">Worker Pay Check</a>
+  <nav class="row"><button type="button" class="btn" id="lang">Español</button><button class="theme" type="button">Dark</button></nav></header>
+
+<main id="top">
+<section class="hero" id="calc">
+  <h1 id="h1">Schedule changed? You may be owed money.</h1>
+  <p class="sub" id="lede">For fast-food workers in New York City.</p>
+  <div class="calc">
+    <div class="ask">
+      <h2 id="t-what">What happened?</h2>
+      <div class="opts small" data-pick="kind" id="kind" role="group" aria-labelledby="t-what">
+      <button type="button" data-v="cover" aria-pressed="true">They asked me to cover someone's shift</button>
+      <button type="button" data-v="late">They asked me to stay late</button>
+      <button type="button" data-v="extra">They added hours to my shift</button>
+      <button type="button" data-v="move">They moved my shift (same hours)</button>
+      <button type="button" data-v="cut">They cut or canceled my hours</button>
+      <button type="button" data-v="clopen">I worked a closing shift, then an opening shift less than 11 hours later</button>
+      <button type="button" data-v="asked">I asked for the change myself</button>
+      <button type="button" data-v="trade">I traded shifts with a coworker</button>
+      </div>
+      <div class="dates">
+        <label class="field"><span id="t-told">The day the store told you</span><input type="date" id="told"></label>
+        <label class="field"><span id="t-first">First day of that week's posted schedule</span><input type="date" id="first"></label>
+      </div>
+      <div class="checks">
+        <label class="check"><input type="checkbox" id="ot"><span id="t-ot">The extra time was overtime for me (over 40 hours that week)</span></label>
+        <label class="check"><input type="checkbox" id="em"><span id="t-em">The store had an emergency (power out, weather, a city order)</span></label>
+      </div>
+      <p class="warn" id="consent">The store also needed your yes in writing for this change, before it happened or within 15 minutes after. If you never agreed in writing, say so when you contact the city.</p>
+    </div>
+    <div class="res" aria-live="polite">
+      <div class="stub" id="stub">
+        <div class="head"><span id="t-stub">Pay stub</span><span id="t-where">NYC fast food</span></div>
+        <div class="line item"><span id="lname">Schedule change premium</span><span class="dots"></span><span id="lamt">$15.00</span></div>
+        <div class="line sm"><span id="t-notice">Notice</span><span class="dots"></span><span id="gap"></span></div>
+        <div class="tot"><span id="t-owed">Extra pay the city says you are owed</span><div class="total" id="amt">$15.00</div></div>
+      </div>
+      <p id="why">You were asked, so the extra pay is owed even if you were happy to do it.</p>
+    </div>
   </div>
-  <label class="check"><input type="checkbox" id="ot"><span id="t-ot"></span></label>
-  <label class="check"><input type="checkbox" id="em"><span id="t-em"></span></label>
 </section>
-<section aria-live="polite">
-  <div class="stub"><span class="lbl" id="t-owed"></span><span class="amt" id="amt"></span><p class="why" id="why"></p><p class="warn" id="consent"></p></div>
+
+<section class="band">
+  <h2 id="t-keep">Keep these</h2>
+  <ul class="rows" id="keep"><li><span>A screenshot of the text or message about the change</span><span class="dim">1</span></li><li><span>Your posted schedule for that week</span><span class="dim">2</span></li><li><span>The pay stub that should show the extra pay</span><span class="dim">3</span></li></ul>
 </section>
-<section>
-  <h2 id="t-keep"></h2><ul id="keep"></ul>
-  <h2 id="t-next"></h2><ul id="next"></ul>
-  <p class="small muted" id="fine"></p>
-  <p class="small"><a id="faq" href="https://www.nyc.gov/assets/dca/downloads/pdf/workers/FAQs-FairWorkweek-FastFood.pdf"></a></p>
+
+<section class="band">
+  <h2 id="t-next">If it is not on your check</h2>
+  <ul class="rows" id="next"><li><span>Ask your manager in writing, by text is fine. Keep their answer.</span><span class="dim">1</span></li><li><span>You can contact the city's Department of Consumer and Worker Protection: call 311 and ask for Fair Workweek.</span><span class="dim">2</span></li><li><span>Asking about your rights is protected. Your employer is not allowed to punish you for it.</span><span class="dim">3</span></li></ul>
+</section>
+
+<section class="band tail">
+  <a class="btn solid" id="faq" href="https://www.nyc.gov/assets/dca/downloads/pdf/workers/FAQs-FairWorkweek-FastFood.pdf">Read the city's FAQ</a>
+  <p class="small dim" id="fine">A guide, not legal advice. Based on the city's Fast Food Fair Workweek FAQ. Rules differ outside New York City and outside fast food.</p>
 </section>
 </main>
+
+<footer class="end"><span>Worker Pay Check</span><span>NYC fast food · Fair Workweek</span></footer>
+</div>
+<a class="bar" id="bar" href="#stub" aria-hidden="true" tabindex="-1"><span id="bar-l">Schedule change premium</span><i></i><b id="bar-a">$15.00</b></a>
+
 <script>
 (function(){
-var T={"en": {"title": "Worker Pay Check", "h1": "Did the store owe you extra?", "lede": "For fast-food workers in New York City. Pick what happened to your schedule. See what extra pay the city says you are owed, and what to keep.", "what": "What happened?", "told": "The day the store told you", "first": "First day of that week's posted schedule", "ot": "The extra time was overtime for me (over 40 hours that week)", "em": "The store had an emergency (power out, weather, a city order)", "owed": "Extra pay the city says you are owed", "none": "No extra pay owed for this one.", "keep": "Keep these", "keepl": ["A screenshot of the text or message about the change", "Your posted schedule for that week", "The pay stub that should show the extra pay"], "next": "If it is not on your check", "nextl": ["Ask your manager in writing, by text is fine. Keep their answer.", "You can contact the city's Department of Consumer and Worker Protection: call 311 and ask for Fair Workweek.", "Asking about your rights is protected. Your employer is not allowed to punish you for it."], "consent": "The store also needed your yes in writing for this change, before it happened or within 15 minutes after. If you never agreed in writing, say so when you contact the city.", "fine": "A guide, not legal advice. Based on the city's Fast Food Fair Workweek FAQ. Rules differ outside New York City and outside fast food.", "faq": "Read the city's FAQ", "lang": "Español", "kinds": [["cover", "They asked me to cover someone's shift"], ["late", "They asked me to stay late"], ["extra", "They added hours to my shift"], ["move", "They moved my shift (same hours)"], ["cut", "They cut or canceled my hours"], ["clopen", "I worked a closing shift, then an opening shift less than 11 hours later"], ["asked", "I asked for the change myself"], ["trade", "I traded shifts with a coworker"]], "why": {"cover": "You were asked, so the extra pay is owed even if you were happy to do it.", "late": "You were asked to stay, so the extra pay is owed even if you agreed.", "extra": "Added hours count, even if you wanted them.", "move": "Moving a shift counts as a change even when the hours stay the same.", "cut": "Cutting paid time with short notice costs the store more the later it tells you.", "clopen": "A close followed by an open less than 11 hours apart pays $100 extra, and needs your written yes.", "asked": "Changes you ask for owe nothing extra. Keep your own message asking for it.", "trade": "Trades workers arrange themselves owe nothing extra, if both of you agreed in writing."}, "why_ot": "Added time already paid as overtime owes no extra on top.", "why_em": "Changes forced by a real emergency owe nothing extra. Write down what the emergency was.", "why_far": "You were told more than 14 days ahead, so nothing extra is owed."}, "es": {"title": "Worker Pay Check", "h1": "¿Te debían pago extra?", "lede": "Para trabajadores de comida rápida en la ciudad de Nueva York. Elige qué pasó con tu horario. Mira cuánto pago extra dice la ciudad que te deben y qué debes guardar.", "what": "¿Qué pasó?", "told": "El día que la tienda te avisó", "first": "Primer día del horario publicado de esa semana", "ot": "El tiempo extra fue horas extras para mí (más de 40 horas esa semana)", "em": "La tienda tuvo una emergencia (sin luz, mal tiempo, una orden de la ciudad)", "owed": "Pago extra que la ciudad dice que te deben", "none": "No se debe pago extra por esto.", "keep": "Guarda esto", "keepl": ["Una captura del mensaje sobre el cambio", "Tu horario publicado de esa semana", "El talón de pago donde debe salir el pago extra"], "next": "Si no sale en tu cheque", "nextl": ["Pregúntale a tu gerente por escrito; un mensaje de texto sirve. Guarda su respuesta.", "Puedes contactar al Departamento de Protección del Consumidor y del Trabajador: llama al 311 y pide Fair Workweek.", "Preguntar por tus derechos está protegido. Tu empleador no puede castigarte por eso."], "consent": "La tienda también necesitaba tu sí por escrito para este cambio, antes de que pasara o hasta 15 minutos después. Si nunca aceptaste por escrito, dilo cuando contactes a la ciudad.", "fine": "Es una guía, no consejo legal. Basada en las preguntas frecuentes de la ciudad sobre Fair Workweek para comida rápida. Las reglas cambian fuera de la ciudad y fuera de la comida rápida.", "faq": "Lee las preguntas frecuentes de la ciudad (en inglés)", "lang": "English", "kinds": [["cover", "Me pidieron cubrir el turno de alguien"], ["late", "Me pidieron quedarme más tarde"], ["extra", "Me agregaron horas a mi turno"], ["move", "Me movieron el turno (mismas horas)"], ["cut", "Me recortaron o cancelaron horas"], ["clopen", "Trabajé un cierre y luego una apertura con menos de 11 horas entre ellos"], ["asked", "Yo pedí el cambio"], ["trade", "Cambié turno con un compañero"]], "why": {"cover": "Te lo pidieron, así que se debe el pago extra aunque aceptaras con gusto.", "late": "Te pidieron quedarte, así que se debe el pago extra aunque aceptaras.", "extra": "Las horas agregadas cuentan, aunque las quisieras.", "move": "Mover un turno cuenta como cambio aunque las horas sean las mismas.", "cut": "Recortar tiempo pagado con poco aviso le cuesta más a la tienda mientras más tarde te avise.", "clopen": "Un cierre seguido de una apertura con menos de 11 horas entre ellos paga $100 extra y necesita tu sí por escrito.", "asked": "Los cambios que tú pides no deben nada extra. Guarda tu propio mensaje pidiéndolo.", "trade": "Los cambios que arreglan los trabajadores no deben nada extra, si los dos aceptaron por escrito."}, "why_ot": "El tiempo agregado que ya se paga como horas extras no debe nada más encima.", "why_em": "Los cambios por una emergencia real no deben nada extra. Anota cuál fue la emergencia.", "why_far": "Te avisaron con más de 14 días, así que no se debe nada extra."}};
+var R=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function $$(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))}
+// reveal on scroll
+// content is readable at rest; only things below the first screen get armed to rise, and counters start from 0 only when seen
+if('IntersectionObserver' in window&&!R){var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.toggle('armed',false);
+  if(e.target.matches('[data-count]'))count(e.target);io.unobserve(e.target)}})},{rootMargin:'0px 0px -8% 0px'});
+  $$('[data-reveal]').forEach(function(el){if(el.getBoundingClientRect().top>innerHeight)el.classList.add('armed')});
+  $$('[data-reveal],[data-count]').forEach(function(el){io.observe(el)})}
+function fmt(n,d){return n.toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d})}
+function count(el){var to=parseFloat(el.dataset.count)||0,d=+(el.dataset.dec||0),pre=el.dataset.pre||'',suf=el.dataset.suf||'';
+  if(R){el.textContent=pre+fmt(to,d)+suf;return}var t0=performance.now(),dur=1100,from=parseFloat(el.dataset.from||0);
+  (function f(t){var p=Math.min(1,(t-t0)/dur),e=1-Math.pow(1-p,3);el.textContent=pre+fmt(from+(to-from)*e,d)+suf;if(p<1)requestAnimationFrame(f)})(t0)}
+window.house={count:function(el,to){el.dataset.from=(parseFloat((el.textContent||'').replace(/[^0-9.\-]/g,''))||0);el.dataset.count=to;count(el)}};
+// pick rows
+$$('.opts').forEach(function(g){var bs=$$('button',g);bs.forEach(function(b,k){if(!b.dataset.k&&bs.length<10)b.dataset.k=String(k+1);
+  b.setAttribute('aria-pressed',b.getAttribute('aria-pressed')==='true'?'true':'false');
+  b.addEventListener('click',function(){bs.forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false')});
+    document.dispatchEvent(new CustomEvent('pick',{detail:{name:g.dataset.pick||'',value:b.dataset.v||b.textContent.trim(),el:b}}))})})});
+// number keys pick inside the focused or first visible group
+document.addEventListener('keydown',function(e){if(e.metaKey||e.ctrlKey||e.altKey)return;var t=e.target;if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.tagName==='SELECT'))return;
+  var n=parseInt(e.key,10);if(!n)return;var g=(t&&t.closest&&t.closest('.opts'))||$$('.opts').filter(function(x){var r=x.getBoundingClientRect();return r.top<innerHeight&&r.bottom>0})[0];
+  if(!g)return;var b=$$('button',g)[n-1];if(b){b.click();b.focus()}});
+// theme toggle
+var root=document.documentElement;function cur(){return root.dataset.theme||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light')}
+function label(){$$('.theme').forEach(function(b){b.textContent=cur()==='dark'?'Light':'Dark'})}
+try{var sv=localStorage.getItem('house-theme');if(sv)root.dataset.theme=sv}catch(e){}
+label();$$('.theme').forEach(function(b){b.addEventListener('click',function(){root.dataset.theme=cur()==='dark'?'light':'dark';try{localStorage.setItem('house-theme',root.dataset.theme)}catch(e){}label()})});
+})();
+</script>
+<script>
+(function(){
+var T={"en": {"title": "Worker Pay Check", "h1": "Schedule changed? You may be owed money.", "lede": "For fast-food workers in New York City.", "what": "What happened?", "told": "The day the store told you", "first": "First day of that week's posted schedule", "ot": "The extra time was overtime for me (over 40 hours that week)", "em": "The store had an emergency (power out, weather, a city order)", "owed": "Extra pay the city says you are owed", "none": "No extra pay owed for this one.", "keep": "Keep these", "keepl": ["A screenshot of the text or message about the change", "Your posted schedule for that week", "The pay stub that should show the extra pay"], "next": "If it is not on your check", "nextl": ["Ask your manager in writing, by text is fine. Keep their answer.", "You can contact the city's Department of Consumer and Worker Protection: call 311 and ask for Fair Workweek.", "Asking about your rights is protected. Your employer is not allowed to punish you for it."], "consent": "The store also needed your yes in writing for this change, before it happened or within 15 minutes after. If you never agreed in writing, say so when you contact the city.", "fine": "A guide, not legal advice. Based on the city's Fast Food Fair Workweek FAQ. Rules differ outside New York City and outside fast food.", "faq": "Read the city's FAQ", "lang": "Español", "kinds": [["cover", "They asked me to cover someone's shift"], ["late", "They asked me to stay late"], ["extra", "They added hours to my shift"], ["move", "They moved my shift (same hours)"], ["cut", "They cut or canceled my hours"], ["clopen", "I worked a closing shift, then an opening shift less than 11 hours later"], ["asked", "I asked for the change myself"], ["trade", "I traded shifts with a coworker"]], "why": {"cover": "You were asked, so the extra pay is owed even if you were happy to do it.", "late": "You were asked to stay, so the extra pay is owed even if you agreed.", "extra": "Added hours count, even if you wanted them.", "move": "Moving a shift counts as a change even when the hours stay the same.", "cut": "Cutting paid time with short notice costs the store more the later it tells you.", "clopen": "A close followed by an open less than 11 hours apart pays $100 extra, and needs your written yes.", "asked": "Changes you ask for owe nothing extra. Keep your own message asking for it.", "trade": "Trades workers arrange themselves owe nothing extra, if both of you agreed in writing."}, "why_ot": "Added time already paid as overtime owes no extra on top.", "why_em": "Changes forced by a real emergency owe nothing extra. Write down what the emergency was.", "why_far": "You were told more than 14 days ahead, so nothing extra is owed.", "stub": "Pay stub", "where": "NYC fast food", "notice": "Notice", "day1": "1 day", "days": "{n} days", "after": "After the week began", "lines": {"change": "Schedule change premium", "cut": "Lost hours premium", "clopen": "Clopening premium"}}, "es": {"title": "Worker Pay Check", "h1": "¿Cambió tu horario? Te pueden deber dinero.", "lede": "Para trabajadores de comida rápida en la ciudad de Nueva York.", "what": "¿Qué pasó?", "told": "El día que la tienda te avisó", "first": "Primer día del horario publicado de esa semana", "ot": "El tiempo extra fue horas extras para mí (más de 40 horas esa semana)", "em": "La tienda tuvo una emergencia (sin luz, mal tiempo, una orden de la ciudad)", "owed": "Pago extra que la ciudad dice que te deben", "none": "No se debe pago extra por esto.", "keep": "Guarda esto", "keepl": ["Una captura del mensaje sobre el cambio", "Tu horario publicado de esa semana", "El talón de pago donde debe salir el pago extra"], "next": "Si no sale en tu cheque", "nextl": ["Pregúntale a tu gerente por escrito; un mensaje de texto sirve. Guarda su respuesta.", "Puedes contactar al Departamento de Protección del Consumidor y del Trabajador: llama al 311 y pide Fair Workweek.", "Preguntar por tus derechos está protegido. Tu empleador no puede castigarte por eso."], "consent": "La tienda también necesitaba tu sí por escrito para este cambio, antes de que pasara o hasta 15 minutos después. Si nunca aceptaste por escrito, dilo cuando contactes a la ciudad.", "fine": "Es una guía, no consejo legal. Basada en las preguntas frecuentes de la ciudad sobre Fair Workweek para comida rápida. Las reglas cambian fuera de la ciudad y fuera de la comida rápida.", "faq": "Lee las preguntas frecuentes de la ciudad (en inglés)", "lang": "English", "kinds": [["cover", "Me pidieron cubrir el turno de alguien"], ["late", "Me pidieron quedarme más tarde"], ["extra", "Me agregaron horas a mi turno"], ["move", "Me movieron el turno (mismas horas)"], ["cut", "Me recortaron o cancelaron horas"], ["clopen", "Trabajé un cierre y luego una apertura con menos de 11 horas entre ellos"], ["asked", "Yo pedí el cambio"], ["trade", "Cambié turno con un compañero"]], "why": {"cover": "Te lo pidieron, así que se debe el pago extra aunque aceptaras con gusto.", "late": "Te pidieron quedarte, así que se debe el pago extra aunque aceptaras.", "extra": "Las horas agregadas cuentan, aunque las quisieras.", "move": "Mover un turno cuenta como cambio aunque las horas sean las mismas.", "cut": "Recortar tiempo pagado con poco aviso le cuesta más a la tienda mientras más tarde te avise.", "clopen": "Un cierre seguido de una apertura con menos de 11 horas entre ellos paga $100 extra y necesita tu sí por escrito.", "asked": "Los cambios que tú pides no deben nada extra. Guarda tu propio mensaje pidiéndolo.", "trade": "Los cambios que arreglan los trabajadores no deben nada extra, si los dos aceptaron por escrito."}, "why_ot": "El tiempo agregado que ya se paga como horas extras no debe nada más encima.", "why_em": "Los cambios por una emergencia real no deben nada extra. Anota cuál fue la emergencia.", "why_far": "Te avisaron con más de 14 días, así que no se debe nada extra.", "stub": "Talón de pago", "where": "Comida rápida NYC", "notice": "Aviso", "day1": "1 día", "days": "{n} días", "after": "Después de empezar la semana", "lines": {"change": "Prima por cambio de horario", "cut": "Prima por horas perdidas", "clopen": "Prima por cierre y apertura"}}};
 var $=function(i){return document.getElementById(i)};
 function tier(first,told){var d=Math.round((Date.parse(first+"T00:00:00Z")-Date.parse(told+"T00:00:00Z"))/86400000);return d>14?0:d>7?1:d>1?2:3}
 function owed(kind,first,told,ot,em){
@@ -82,16 +251,25 @@ function owed(kind,first,told,ot,em){
 var L="en";try{var q=localStorage.getItem("wpc-lang");if(q==="es")L="es"}catch(e){}
 var iso=function(d){var z=new Date(d.getTime()-d.getTimezoneOffset()*60000);return z.toISOString().slice(0,10)};
 var now=new Date(),mon=new Date(now);mon.setDate(now.getDate()-((now.getDay()+6)%7));$("first").value=iso(mon);$("told").value=iso(now);
-function list(id,arr){var u=$(id);u.textContent="";arr.forEach(function(x){var li=document.createElement("li");li.textContent=x;u.append(li)})}
+function el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e}
+function list(id,arr){var u=$(id);u.textContent="";arr.forEach(function(x,i){var li=el("li");li.append(el("span","",x),el("span","dim",String(i+1)));u.append(li)})}
+function kindNow(){var b=$("kind").querySelector('[aria-pressed="true"]');return b?b.dataset.v:"cover"}
 function words(){var t=T[L];document.documentElement.lang=L;$("lang").textContent=t.lang;$("h1").textContent=t.h1;$("lede").textContent=t.lede;$("t-what").textContent=t.what;$("t-told").textContent=t.told;$("t-first").textContent=t.first;$("t-ot").textContent=t.ot;$("t-em").textContent=t.em;$("t-owed").textContent=t.owed;$("t-keep").textContent=t.keep;$("t-next").textContent=t.next;$("fine").textContent=t.fine;$("faq").textContent=t.faq;list("keep",t.keepl);list("next",t.nextl);
- var k=$("kind"),v=k.value||"cover";k.textContent="";t.kinds.forEach(function(x){var o=document.createElement("option");o.value=x[0];o.textContent=x[1];k.append(o)});k.value=v;draw()}
-function draw(){var t=T[L],k=$("kind").value,first=$("first").value,told=$("told").value,ot=$("ot").checked,em=$("em").checked;if(!first||!told)return;
- var a=owed(k,first,told,ot,em);$("amt").textContent=a>0?"$"+a+".00":"$0";
+ $("t-stub").textContent=t.stub;$("t-where").textContent=t.where;$("t-notice").textContent=t.notice;
+ var names={};t.kinds.forEach(function(x){names[x[0]]=x[1]});Array.prototype.forEach.call($("kind").querySelectorAll("button"),function(b){b.textContent=names[b.dataset.v]});draw()}
+function money(a){return a>0?"$"+a+".00":"$0"}
+function draw(){var t=T[L],k=kindNow(),first=$("first").value,told=$("told").value,ot=$("ot").checked,em=$("em").checked;if(!first||!told)return;
+ var a=owed(k,first,told,ot,em);$("amt").textContent=money(a);
+ var nm=t.lines[k==="cut"||k==="clopen"?k:"change"];$("lname").textContent=nm;$("lamt").textContent=money(a);$("bar-l").textContent=nm;$("bar-a").textContent=money(a);$("stub").classList.toggle("zero",a===0);
+ var d=Math.round((Date.parse(first+"T00:00:00Z")-Date.parse(told+"T00:00:00Z"))/86400000);$("gap").textContent=d<0?t.after:(d===1?t.day1:t.days.replace("{n}",d));
  var w=t.why[k];if(a===0&&!/asked|trade/.test(k)){w=em&&k!=="clopen"?t.why_em:(ot&&k!=="move"&&k!=="cut"?t.why_ot:t.why_far)}
  $("why").textContent=a===0&&/asked|trade/.test(k)?t.why[k]:(a===0?w:t.why[k]);
  var needs=/cover|late|extra|move|clopen/.test(k);$("consent").textContent=needs?t.consent:"";$("consent").hidden=!needs}
 ["kind","first","told","ot","em"].forEach(function(id){$(id).addEventListener("change",draw);$(id).addEventListener("input",draw)});
+document.addEventListener("pick",function(e){if(e.detail.name==="kind")draw()});
 $("lang").onclick=function(){L=L==="en"?"es":"en";try{localStorage.setItem("wpc-lang",L)}catch(e){}words()};
+if("IntersectionObserver" in window){var seen={},bar=$("bar");new IntersectionObserver(function(es){es.forEach(function(x){seen[x.target.id]=x.isIntersecting});bar.classList.toggle("on",!!seen.calc&&!seen.stub)}).observe($("calc"));
+ new IntersectionObserver(function(es){es.forEach(function(x){seen[x.target.id]=x.isIntersecting});bar.classList.toggle("on",!!seen.calc&&!seen.stub)}).observe($("stub"))}
 window.__owed=owed;words();
 })();
 </script>

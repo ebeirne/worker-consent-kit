@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Worker Consent Kit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&display=swap">
+<style>
+:root{--bg:#ffffff;--fg:#000000;--dim:#5e5e5e;--faint:#e9e9e9;--inv-bg:#000000;--inv-fg:#ffffff}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#000000;--fg:#ffffff;--dim:#a6a6a6;--faint:#1c1c1c;--inv-bg:#ffffff;--inv-fg:#000000;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#000000;--fg:#ffffff;--dim:#a6a6a6;--faint:#1c1c1c;--inv-bg:#ffffff;--inv-fg:#000000;color-scheme:dark}
+*{box-sizing:border-box}
+html{background:var(--bg);-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--fg);font:400 clamp(18px,1.5vw,21px)/1.42 "Inter Tight","Helvetica Neue",Helvetica,Arial,sans-serif;letter-spacing:-.011em;margin:0;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));-webkit-font-smoothing:antialiased}
+::selection{background:var(--fg);color:var(--bg)}
+.wrap{max-width:1280px;margin:0 auto}
+a{color:inherit;text-underline-offset:.18em;text-decoration-thickness:1px}
+h1,h2,h3,h4{font-weight:600;margin:0;text-wrap:balance}
+h1{font-size:clamp(54px,12.5vw,188px);line-height:.86;letter-spacing:-.058em}
+h2{font-size:clamp(40px,7.4vw,112px);line-height:.9;letter-spacing:-.05em}
+h3{font-size:clamp(28px,3.8vw,52px);line-height:.98;letter-spacing:-.035em}
+h4{font-size:clamp(21px,2vw,26px);line-height:1.1;letter-spacing:-.02em}
+p{margin:0;max-width:38ch}
+.lede{font-size:clamp(23px,2.7vw,36px);line-height:1.14;letter-spacing:-.025em;max-width:26ch}
+.dim{color:var(--dim)}
+.small{font-size:15px;line-height:1.4;letter-spacing:0}
+.stack{display:grid;gap:clamp(20px,3vw,36px)}
+.row{display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:clamp(28px,5vw,72px)}
+.grid2>*,.stack>*{min-width:0}
+header.top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-block:18px calc(18px + 0px);font-weight:500}
+header.top .name{font-size:19px;letter-spacing:-.02em;text-decoration:none}
+.hero{padding-block:clamp(48px,11vw,170px) clamp(40px,8vw,120px);display:grid;gap:clamp(24px,4vw,48px)}
+section.band{border-top:1px solid var(--fg);padding-block:clamp(56px,10vw,150px);display:grid;gap:clamp(24px,4vw,48px)}
+footer.end{border-top:1px solid var(--fg);padding-block:28px 48px;display:flex;flex-wrap:wrap;gap:12px 28px;justify-content:space-between;font-size:15px}
+hr{border:0;border-top:1px solid var(--fg);margin:0}
+/* reveal */
+[data-reveal]{transition:transform .9s cubic-bezier(.2,.7,.1,1)}
+[data-reveal].armed{transform:translateY(36px)}
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5em;min-height:56px;padding:0 26px;border:1.5px solid var(--fg);background:transparent;color:var(--fg);
+  font-family:inherit;font-weight:500;font-size:clamp(18px,1.6vw,21px);line-height:1;letter-spacing:-.015em;text-decoration:none;cursor:pointer;border-radius:0;transition:background .14s,color .14s}
+.btn:hover,.btn:focus-visible,.btn.solid{background:var(--fg);color:var(--bg)}
+.btn.solid:hover{background:transparent;color:var(--fg)}
+.btn:active{transform:translateY(1px)}
+button{font-family:inherit}
+:focus-visible{outline:2px solid var(--fg);outline-offset:3px}
+/* big choice rows */
+.opts{display:grid;border-top:1px solid var(--fg)}
+.opts>button{all:unset;box-sizing:border-box;cursor:pointer;display:flex;justify-content:space-between;align-items:baseline;gap:16px;border-bottom:1px solid var(--fg);
+  padding:clamp(14px,2vw,22px) 0;font-weight:600;font-size:clamp(26px,3.6vw,48px);line-height:1;letter-spacing:-.035em;transition:background .14s,color .14s,padding .2s}
+.opts>button::after{content:attr(data-k);font-size:15px;font-weight:500;letter-spacing:0;opacity:.55}
+.opts>button:hover,.opts>button:focus-visible{background:var(--fg);color:var(--bg);padding-left:14px;padding-right:14px;outline:none}
+.opts>button[aria-pressed="true"]{background:var(--fg);color:var(--bg);padding-left:14px;padding-right:14px}
+.opts.small>button{font-size:clamp(20px,2.2vw,28px)}
+/* fields */
+.field{display:grid;gap:8px}
+.field>span{font-size:16px;font-weight:500;color:var(--dim)}
+.field input,.field select,.field textarea{width:100%;min-width:0;border:0;border-bottom:2px solid var(--fg);border-radius:0;background:transparent;color:var(--fg);padding:6px 0 10px;
+  font-family:inherit;font-weight:600;font-size:clamp(28px,3.6vw,48px);line-height:1.05;letter-spacing:-.035em;outline:none;-webkit-appearance:none;appearance:none}
+.field textarea{font-size:clamp(22px,2.4vw,30px);line-height:1.2;resize:vertical;min-height:3.6em}
+.field input::placeholder,.field textarea::placeholder{color:var(--dim);opacity:.6}
+.field input:focus,.field select:focus,.field textarea:focus{border-bottom-width:5px;padding-bottom:7px}
+input[type=range]{width:100%;accent-color:var(--fg)}
+input[type=checkbox]{accent-color:var(--fg);width:22px;height:22px}
+/* numbers */
+.num{font-weight:600;font-size:clamp(84px,19vw,280px);line-height:.82;letter-spacing:-.065em;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:clip}
+.num.mid{font-size:clamp(56px,10vw,150px)}
+/* rows that invert */
+ul.rows{list-style:none;margin:0;padding:0;border-top:1px solid var(--fg)}
+ul.rows>li{border-bottom:1px solid var(--fg);display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:baseline;padding:18px 0;transition:background .14s,color .14s,padding .2s}
+ul.rows>li:hover{background:var(--fg);color:var(--bg);padding-left:14px;padding-right:14px}
+ul.rows>li:hover .dim{color:inherit;opacity:.7}
+ul.rows>li>a{grid-column:1/-1}
+/* box that inverts */
+.inv{background:var(--fg);color:var(--bg)}
+.inv .dim{color:inherit;opacity:.7}
+.inv .btn{border-color:var(--bg);color:var(--bg)}
+.inv .btn:hover{background:var(--bg);color:var(--fg)}
+.boxed{border:1.5px solid var(--fg);padding:clamp(20px,3vw,36px)}
+/* theme toggle */
+.theme{all:unset;cursor:pointer;font-weight:500;font-size:16px;border-bottom:1px solid currentColor;line-height:1.3}
+@media (prefers-reduced-motion:reduce){[data-reveal],[data-reveal].armed{transform:none;transition:none}}
+@media (max-width:600px){header.top{padding-block:14px}.btn{width:100%}}
+
+
+.hero{padding-block:clamp(28px,6vw,72px) clamp(40px,7vw,96px);gap:clamp(20px,3vw,36px)}
+.hero h1{font-size:clamp(46px,7.6vw,118px);line-height:.9;max-width:12ch}
+.hero .sub{font-size:clamp(19px,1.8vw,23px);color:var(--dim)}
+.stage{display:grid;grid-template-columns:minmax(0,440px) minmax(0,1fr);gap:clamp(28px,6vw,96px);align-items:center}
+@media (max-width:760px){.stage{grid-template-columns:minmax(0,1fr)}}
+.phone{border:1.5px solid var(--fg);border-radius:30px;padding:22px 16px 18px;display:grid;gap:10px;min-width:0}
+.phone .who{font-size:14px;color:var(--dim);text-align:center;padding-bottom:6px;border-bottom:1px solid var(--faint)}
+.bub{max-width:86%;padding:11px 16px;border-radius:20px;font-size:19px;line-height:1.25;letter-spacing:-.01em;min-width:0}
+.bub.store{border:1.5px solid var(--fg);justify-self:start;border-bottom-left-radius:6px}
+.bub.worker{background:var(--fg);color:var(--bg);justify-self:end;border-bottom-right-radius:6px;display:flex;width:86%}
+.bub.worker input{all:unset;width:100%;min-width:0;color:inherit;font:inherit;caret-color:currentColor}
+.bub.worker input::placeholder{color:inherit;opacity:.55}
+.hint{font-size:14px;color:var(--dim);text-align:right}
+.verdict{font-weight:700;font-size:clamp(76px,13vw,190px);line-height:.84;letter-spacing:-.065em}
+.then{font-size:clamp(22px,2.4vw,32px);font-weight:600;letter-spacing:-.03em;margin-top:14px}
+.why{font-size:17px;color:var(--dim);margin-top:8px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips button{all:unset;cursor:pointer;border:1.5px solid var(--fg);border-radius:999px;padding:7px 14px;font-size:16px;font-weight:500}
+.chips button:hover,.chips button:focus-visible{background:var(--fg);color:var(--bg)}
+.stub{border:1.5px solid var(--fg);padding:clamp(18px,3vw,30px);display:grid;gap:14px;font-variant-numeric:tabular-nums}
+.stub .line{display:flex;gap:10px;align-items:baseline;font-size:clamp(18px,1.8vw,22px)}
+.stub .line .dots{flex:1;border-bottom:2px dotted var(--fg);transform:translateY(-5px);min-width:20px}
+.stub .total{font-weight:700;font-size:clamp(54px,9vw,120px);line-height:.9;letter-spacing:-.06em;text-align:right}
+.stub .head{display:flex;justify-content:space-between;font-size:14px;color:var(--dim);border-bottom:1px solid var(--fg);padding-bottom:10px}
+.big1{font-weight:700;font-size:clamp(76px,15vw,220px);line-height:.84;letter-spacing:-.065em}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+<header class="top"><a class="name" href="#top">Worker Consent Kit</a>
+  <nav class="row"><a href="https://github.com/ebeirne/worker-consent-kit">GitHub</a><button class="theme" type="button">Dark</button></nav></header>
+
+<main id="top">
+<section class="hero">
+  <h1>Never count a maybe as a yes.</h1>
+  <p class="sub">Reads a worker’s reply to “can you cover?” English or Spanish. Free and open.</p>
+  <div class="stage">
+    <div class="phone" aria-label="Text thread">
+      <div class="who">Store manager</div>
+      <div class="bub store">Can you cover 5 to 11 tonight? Reply YES or NO</div>
+      <label class="bub worker"><input id="reply" autocomplete="off" spellcheck="false" placeholder="Type a reply" value="ok but only till 9" aria-label="Worker’s reply"></label>
+      <div class="hint">Type your own reply</div>
+    </div>
+    <div aria-live="polite">
+      <div class="verdict" id="verdict">Yes, but</div>
+      <div class="then" id="then">Sent to the manager.</div>
+      <div class="why" id="why">Only part of the shift.</div>
+    </div>
+  </div>
+  <div class="chips" id="samples"></div>
+</section>
+
+<section class="band" id="fool" data-reveal>
+  <h2>Try to fool it.</h2>
+  <p class="lede">Write a reply that isn’t a yes. See if it gets recorded as one.</p>
+  <div class="grid2">
+    <div class="stack">
+      <label class="field"><span>Your reply</span><input id="trap" autocomplete="off" spellcheck="false" placeholder="yeah no"></label>
+      <div class="opts small" data-pick="meant"><button data-v="no" aria-pressed="true">I meant no, or not sure</button><button data-v="yes">I meant yes</button></div>
+      <div class="row"><button class="btn solid" id="go" type="button">Test it</button><button class="btn" id="copy" type="button">Copy my tries</button></div>
+    </div>
+    <div class="stack">
+      <div><div class="big1" id="fooled">0</div><h4>times you fooled it, in <span id="tries">0</span> tries</h4></div>
+      <ul class="rows" id="log"></ul>
+      <p class="small dim" id="copied"></p>
+    </div>
+  </div>
+</section>
+
+<section class="band" id="owe" data-reveal>
+  <h2>What the store owes.</h2>
+  <div class="grid2">
+    <div class="stack">
+      <div class="opts small" data-pick="kind">
+        <button data-v="cover" aria-pressed="true">Asked to cover a shift</button><button data-v="late">Asked to stay late</button>
+        <button data-v="cut">Shift cut or canceled</button><button data-v="clopen">Close, then open next day</button>
+        <button data-v="asked">I asked for the change</button></div>
+      <label class="field"><span>Told how many days before the schedule week? <b id="dval">3 days</b></span>
+        <input type="range" id="days" min="0" max="20" value="3"></label>
+    </div>
+    <div class="stack">
+      <div class="stub" aria-live="polite">
+        <div class="head"><span>Pay stub</span><span>NYC fast food</span></div>
+        <div class="line"><span id="lname">Schedule change premium</span><span class="dots"></span><span id="lamt">$15.00</span></div>
+        <div class="total" id="owed">$15</div>
+      </div>
+      <p class="small dim"><span id="owhy">Less than two weeks’ notice.</span> City’s Fair Workweek rules. A guide, not legal advice.</p>
+      <a class="btn" href="worker-pay-check.html">Full Worker Pay Check, English and Spanish</a>
+    </div>
+  </div>
+</section>
+
+<section class="band" id="numbers" data-reveal>
+  <div><div class="big1">0</div><h3>wrong yeses in 230 test replies.</h3></div>
+  <ul class="rows">
+    <li><h4>Tuning set</h4><span>100 of 100</span></li>
+    <li><h4>Held-out set, scored once</h4><span>46 of 50</span></li>
+    <li><h4>Harder set, written after the rules froze</h4><span>69 of 80</span></li>
+    <li><h4>City pay examples</h4><span>16 of 16</span></li>
+  </ul>
+  <p class="small dim">Test replies were written by hand, not collected from workers. Real texts are next.</p>
+</section>
+
+<section class="band" id="use" data-reveal>
+  <h2>npm test</h2>
+  <p class="lede">No dependencies. MIT licensed.</p>
+  <div class="row"><a class="btn solid" href="https://github.com/ebeirne/worker-consent-kit">Code on GitHub</a><a class="btn" href="https://github.com/ebeirne/worker-consent-kit/issues">Send a reply that breaks it</a></div>
+</section>
+</main>
+
+<footer class="end"><span>Worker Consent Kit. Built in New York City.</span><a href="https://github.com/ebeirne/worker-consent-kit">github.com/ebeirne/worker-consent-kit</a></footer>
+</div>
+
+<script>
+(function(){
+var R=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function $$(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))}
+// reveal on scroll
+// content is readable at rest; only things below the first screen get armed to rise, and counters start from 0 only when seen
+if('IntersectionObserver' in window&&!R){var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.toggle('armed',false);
+  if(e.target.matches('[data-count]'))count(e.target);io.unobserve(e.target)}})},{rootMargin:'0px 0px -8% 0px'});
+  $$('[data-reveal]').forEach(function(el){if(el.getBoundingClientRect().top>innerHeight)el.classList.add('armed')});
+  $$('[data-reveal],[data-count]').forEach(function(el){io.observe(el)})}
+function fmt(n,d){return n.toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d})}
+function count(el){var to=parseFloat(el.dataset.count)||0,d=+(el.dataset.dec||0),pre=el.dataset.pre||'',suf=el.dataset.suf||'';
+  if(R){el.textContent=pre+fmt(to,d)+suf;return}var t0=performance.now(),dur=1100,from=parseFloat(el.dataset.from||0);
+  (function f(t){var p=Math.min(1,(t-t0)/dur),e=1-Math.pow(1-p,3);el.textContent=pre+fmt(from+(to-from)*e,d)+suf;if(p<1)requestAnimationFrame(f)})(t0)}
+window.house={count:function(el,to){el.dataset.from=(parseFloat((el.textContent||'').replace(/[^0-9.\-]/g,''))||0);el.dataset.count=to;count(el)}};
+// pick rows
+$$('.opts').forEach(function(g){var bs=$$('button',g);bs.forEach(function(b,k){if(!b.dataset.k&&bs.length<10)b.dataset.k=String(k+1);
+  b.setAttribute('aria-pressed',b.getAttribute('aria-pressed')==='true'?'true':'false');
+  b.addEventListener('click',function(){bs.forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false')});
+    document.dispatchEvent(new CustomEvent('pick',{detail:{name:g.dataset.pick||'',value:b.dataset.v||b.textContent.trim(),el:b}}))})})});
+// number keys pick inside the focused or first visible group
+document.addEventListener('keydown',function(e){if(e.metaKey||e.ctrlKey||e.altKey)return;var t=e.target;if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.tagName==='SELECT'))return;
+  var n=parseInt(e.key,10);if(!n)return;var g=(t&&t.closest&&t.closest('.opts'))||$$('.opts').filter(function(x){var r=x.getBoundingClientRect();return r.top<innerHeight&&r.bottom>0})[0];
+  if(!g)return;var b=$$('button',g)[n-1];if(b){b.click();b.focus()}});
+// theme toggle
+var root=document.documentElement;function cur(){return root.dataset.theme||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light')}
+function label(){$$('.theme').forEach(function(b){b.textContent=cur()==='dark'?'Light':'Dark'})}
+try{var sv=localStorage.getItem('house-theme');if(sv)root.dataset.theme=sv}catch(e){}
+label();$$('.theme').forEach(function(b){b.addEventListener('click',function(){root.dataset.theme=cur()==='dark'?'light':'dark';try{localStorage.setItem('house-theme',root.dataset.theme)}catch(e){}label()})});
+})();
+</script>
+<script>// Reply reader: decides what a short text reply to "Can you work X? Reply YES or NO" means.
+// Labels: yes, no, conditional, unclear. `sure` is true only when a yes is safe to record without a confirm step.
+(function (root) {
+  var YESPH = /\b(no problem|no prob|np|no worries|not a problem|no hay problema|sin problema|no problemo)\b/g;
+  var NOTSURE = /\b(not sure|no se|no estoy segur[oa]|idk|i dont know|dunno|no idea)\b/;
+  var COND = /\b(but|pero|only|solo|until|till|til|hasta|after|despues|if|unless|a menos|late|tarde|early|temprano|leave at|salir a|come at|come in at|llego|llegar|get there|in an hour|en una hora|not close|no puedo cerrar|instead|mejor)\b|\bsi me\b|\ba las \d|\b\d{1,2}(:\d{2})?\s*(am|pm)?\b/;
+  var QUESTION = /\?\s*$|\b(who is this|whos this|who this|quien es|quien eres|what time|a que hora|how much|cuanto|which store|what store|que tienda|wrong number|numero equivocado|call me|llamame|is this about|es para)\b/;
+  var HEDGE = /\b(maybe|tal vez|quizas?|probably|prob|i might|might|i think|creo que|let me (check|see|ask)|lemme (check|see)|dejame (ver|preguntar|checar)|ill let you know|te aviso|i guess|depends|depende|ask (him|her|them|[a-z]+)|preguntale)\b/;
+  var NO = /\b(no|nope|nah|naw|no+o|cant|cannot|can not|wont|not today|not tonight|not this time|busy|im off|pass|no puedo|no voy|no gracias|imposible|ocupad[oa]|sorry|lo siento|sick|enferm[oa]|class|clase|school|escuela|other job|otro trabajo|noemoji)\b/;
+  var STRONG = ['yes', 'yeah', 'yea', 'yep', 'yup', 'sure', 'ok', 'okay', 'okey', 'k', 'kk', 'bet', 'omw', 'si', 'sip', 'claro', 'dale', 'va', 'vale', 'okis', 'voy', 'puedo', 'yesemoji', 'yesphrase', 'coming', 'absolutely', 'course', 'yessir', 'can', 'alright', 'aight', 'ight', 'gotchu', 'gotcha', 'definitely', 'simon', 'seguro', 'yas', 'yess', 'yesss'];
+  var STRONGPH = /\b(be there|on my way|count me in|got it|got you|say less|i can|de una)\b/;
+  var OK = new Set(STRONG.concat(['i', 'ill', 'come', 'do', 'it', 'got', 'you', 'u', 'count', 'me', 'in', 'be', 'there', 'of', 'thing', 'sir', 'maam', 'on', 'my', 'way', 'say', 'less', 'que', 'work', 'see', 'ya', 'ahi', 'will', 'de', 'una', 'today', 'tonight', 'hoy', 'now', 'ahora', 'shift', 'turno', 'the', 'el', 'that', 'for', 'te', 'lo', 'please', 'pls', 'thanks', 'thx', 'gracias', 'boss', 'jefe', 'jefa', 'bro', 'lol', 'haha', 'cool', 'totally', 'and', 'y', 'ma']));
+  function norm(s) {
+    s = String(s || '').replace(/[‘’']/g, '').replace(/[👍👌✅🙋💯🫡]/gu, ' yesemoji ').replace(/[👎❌]/gu, ' noemoji ').replace(/❓/gu, '?');
+    s = s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+    return s.replace(/[^a-z0-9?:\s]/g, ' ').replace(/\s+/g, ' ').trim();
+  }
+  function read(text) {
+    var s = norm(text);
+    if (!s) return { label: 'unclear', sure: false, why: 'Empty reply' };
+    s = s.replace(YESPH, 'yesphrase');
+    s = s.replace(/\bno (puedo|voy a poder|voy)\b/g, 'noemoji');
+    if (NOTSURE.test(s)) return { label: 'unclear', sure: false, why: 'Says they are not sure' };
+    var toks = s.replace(/\?/g, ' ').split(' ').filter(Boolean);
+    var hasYes = toks.some(function (t) { return STRONG.indexOf(t) >= 0; }) || STRONGPH.test(s);
+    if (COND.test(s)) return { label: 'conditional', sure: false, why: hasYes ? 'Yes, with a change (time, limit or condition)' : 'Offers something different from the shift asked' };
+    if (QUESTION.test(s)) return { label: 'unclear', sure: false, why: 'Asks a question' };
+    if (HEDGE.test(s)) return { label: 'unclear', sure: false, why: 'Hedges (maybe, let me check)' };
+    var hasNo = NO.test(s);
+    if (hasNo && hasYes) return { label: 'unclear', sure: false, why: 'Says yes and no' };
+    if (hasNo) return { label: 'no', sure: true, why: 'Says no' };
+    if (hasYes) {
+      var clean = toks.every(function (t) { return OK.has(t); });
+      return clean ? { label: 'yes', sure: true, why: 'Plain yes' } : { label: 'yes', sure: false, why: 'Sounds like yes, with other words: confirm first' };
+    }
+    return { label: 'unclear', sure: false, why: 'No yes or no found' };
+  }
+  root.readReply = read;
+  if (typeof module !== 'undefined') module.exports = { read: read, norm: norm };
+})(typeof window !== 'undefined' ? window : globalThis);
+
+// New York City Fast Food Fair Workweek extra pay (premiums), as described in the city's FAQ.
+// tier(): days from the day the worker is told to the first day of the posted schedule week.
+// owed(kind, firstDayOfWeek, toldDate, isOvertime, isEmergency) -> dollars of extra pay.
+// kind: cover | late | extra | move | cut | clopen | asked | trade
+// A guide, not legal advice.
+function tier(first,told){var d=Math.round((Date.parse(first+"T00:00:00Z")-Date.parse(told+"T00:00:00Z"))/86400000);return d>14?0:d>7?1:d>1?2:3}
+function owed(kind,first,told,ot,em){
+  if(kind==="asked"||kind==="trade")return 0;
+  if(kind==="clopen")return 100;
+  if(em)return 0;
+  var t=tier(first,told);
+  if(kind==="cut")return [0,20,45,75][t];
+  if(ot&&kind!=="move")return 0;
+  return [0,10,15,15][t];
+}
+
+
+
+(function(){
+var $=function(i){return document.getElementById(i)};
+var SAMPLES=['sí, ya voy 👍','who is this?','bet','can’t, my kid is sick','si pero llego tarde','maybe','ok but only till 9'];
+SAMPLES.forEach(function(s){var b=document.createElement('button');b.type='button';b.textContent=s;
+  b.onclick=function(){$('reply').value=s;show()};$('samples').appendChild(b)});
+function say(r){
+  if(r.label==='yes'&&r.sure)return ['Yes','Recorded.','A plain yes.'];
+  if(r.label==='yes')return ['Yes?','One more text: “Reply YES to confirm.”','Sounds like yes, with extra words.'];
+  if(r.label==='no')return ['No','Recorded. Next person gets asked.','A plain no.'];
+  if(r.label==='conditional')return ['Yes, but','Sent to the manager.','Only part of the shift, or a condition.'];
+  return ['Unclear','Sent to the manager.',r.why==='Asks a question'?'They asked a question.':r.why==='Hedges (maybe, let me check)'?'A maybe.':r.why+'.'];
+}
+function show(){var a=say(readReply($('reply').value));$('verdict').textContent=a[0];$('then').textContent=a[1];$('why').textContent=a[2]}
+$('reply').addEventListener('input',show);show();
+
+var meant='no',tries=[];try{tries=JSON.parse(localStorage.getItem('wck-tries2')||'[]')}catch(e){}
+var kind='cover';
+document.addEventListener('pick',function(e){if(e.detail.name==='meant')meant=e.detail.value;if(e.detail.name==='kind'){kind=e.detail.value;owe()}});
+function draw(){$('log').innerHTML='';var f=0;tries.forEach(function(t){if(t.wrong)f++});
+  tries.slice().reverse().slice(0,6).forEach(function(t){var li=document.createElement('li');var h=document.createElement('h4');h.textContent='“'+t.text+'”';
+  var s=document.createElement('span');s.textContent=t.wrong?'Fooled it':(t.got==='yes'&&t.sure?'Recorded yes':'Not recorded as yes');li.appendChild(h);li.appendChild(s);$('log').appendChild(li)});
+  $('fooled').textContent=f;$('tries').textContent=tries.length}
+$('go').onclick=function(){var text=$('trap').value.trim();if(!text){$('trap').focus();return}
+  var r=readReply(text);tries.push({text:text,meant:meant,got:r.label,sure:r.sure,wrong:r.label==='yes'&&r.sure&&meant!=='yes'});
+  try{localStorage.setItem('wck-tries2',JSON.stringify(tries.slice(-200)))}catch(e){}$('copied').textContent='';$('trap').value='';$('trap').focus();draw()};
+$('trap').addEventListener('keydown',function(e){if(e.key==='Enter')$('go').click()});
+$('copy').onclick=function(){var t=JSON.stringify(tries.map(function(x){return [x.text,x.meant]}));
+  var done=function(){$('copied').textContent='Copied. Paste it into a GitHub issue to add it to the tests.'};
+  try{navigator.clipboard.writeText(t).then(done,function(){$('copied').textContent=t})}catch(e){$('copied').textContent=t}};
+draw();
+
+var NAME={cover:'Schedule change premium',late:'Schedule change premium',cut:'Lost hours premium',clopen:'Clopening premium',asked:'Schedule change premium'};
+var WHY={cover:'Less than two weeks’ notice.',late:'Less than two weeks’ notice.',cut:'It grows the later they tell you.',
+  clopen:'Under 11 hours between a close and an open. Needs your written yes too.',asked:'You asked for it in writing, so nothing extra.'};
+function owe(){var d=+$('days').value;$('dval').textContent=d+(d===1?' day':' days');var first=new Date(Date.UTC(2027,0,25)),told=new Date(first.getTime()-d*86400000);
+  var iso=function(x){return x.toISOString().slice(0,10)};var v=owed(kind,iso(first),iso(told),false,false);
+  $('owed').textContent='$'+v;$('lamt').textContent='$'+v.toFixed(2);$('lname').textContent=NAME[kind];
+  $('owhy').textContent=(v===0&&kind!=='asked'&&kind!=='clopen')?'Two weeks or more of notice, so nothing extra.':WHY[kind]}
+$('days').addEventListener('input',owe);owe();
+})();
+</script>
+</body>
+</html>

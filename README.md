@@ -38,6 +38,8 @@ node eval/score.js data/set2.json --show
 
 No dependencies. Node 18 or newer.
 
+To try it without Node, open `web/index.html` in any browser: type a reply and see how it's read, try to fool the reader, and see what a schedule change owes. `web/worker-pay-check.html` is the worker-facing pay page in English and Spanish.
+
 ## Use and limits
 
 The pay rules follow New York City's Fast Food Fair Workweek FAQ. They are a guide, not legal advice, and rules differ outside New York City and outside fast food. The reader is a rule-based baseline meant to be beaten; please send test replies that break it.
