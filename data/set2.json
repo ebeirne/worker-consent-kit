@@ -1,0 +1,11 @@
+[
+["yeaa i gotchu","yes"],["ok ok im coming","yes"],["Yes sir 🫡","yes"],["yh i can","yes"],["ya i can do it","yes"],["I can work it","yes"],["Sí puedo ir","yes"],["Si voy 👌","yes"],["okey dokey","yes"],["Yes!! Thank you","yes"],
+["sure sure","yes"],["for sure","yes"],["Yep, see you soon","yes"],["ok i'm on my way now","yes"],["claro que puedo","yes"],["Si señor","yes"],["I'm down","yes"],["down","yes"],["yessss","yes"],["Yes I'll cover it","yes"],
+["Ok I'll take the shift","yes"],["aight bet","yes"],["sí claro, voy","yes"],["Yes. 4 to close works","yes"],
+["nah im good","no"],["I can't sorry 😕","no"],["Cant today","no"],["no i cant","no"],["Not available","no"],["I have plans","no"],["Tengo otro trabajo hoy","no"],["No puedo hoy, lo siento","no"],["im out of town","no"],["I'm not feeling well","no"],
+["no gracias","no"],["nope can't","no"],["Sorry I'm watching my little brother","no"],["no puedo, tengo que cuidar a mi hija","no"],["I'm already working 40","no"],["Not tonight sorry","no"],["Imma pass","no"],["No.","no"],
+["i can come at 5:30","conditional"],["can I start at 6?","conditional"],["only till 8 sorry","conditional"],["I can do 4-7","conditional"],["yes but I gotta leave by 10","conditional"],["Si pero llego como a las 5","conditional"],["puedo de 6 a cierre","conditional"],["solo puedo hasta las 9","conditional"],
+["If I can get a ride yes","conditional"],["I can if I don't have to close","conditional"],["after my other shift ends at 6","conditional"],["ok but I'm bringing my kid","conditional"],["I can do it tomorrow tho","conditional"],["can someone else close? I can do till 9","conditional"],["yes if Maria can switch with me","conditional"],["si me dan el viernes libre","conditional"],["I'll come in late like 5","conditional"],["maybe for like 3 hours","conditional"],
+["huh","unclear"],["who's this?","unclear"],["what store","unclear"],["wait what shift","unclear"],["how much is the extra","unclear"],["is it paid?","unclear"],["can you call me","unclear"],["lemme see","unclear"],["ill check and get back to u","unclear"],["possibly","unclear"],
+["not sure yet","unclear"],["depende de mi mamá","unclear"],["quien eres?","unclear"],["👀","unclear"],["k?","unclear"],["bruh","unclear"],["Did Jordan quit?","unclear"],["I'll try","unclear"],["ask someone else first","unclear"],["ok what","unclear"]
+]

@@ -1,0 +1,13 @@
+[
+["yes","yes"],["Yes!","yes"],["yeah","yes"],["yea i got it","yes"],["sure","yes"],["ok","yes"],["okay omw","yes"],["bet","yes"],["say less","yes"],["i can come","yes"],
+["I'll be there","yes"],["on my way","yes"],["omw","yes"],["👍","yes"],["✅","yes"],["yup","yes"],["count me in","yes"],["I got you","yes"],["sí","yes"],["si","yes"],
+["Si!","yes"],["claro","yes"],["claro que sí","yes"],["dale","yes"],["sí puedo","yes"],["ya voy","yes"],["ahí voy","yes"],["ok voy","yes"],["okis","yes"],["va","yes"],
+["Yes I can work","yes"],["yes ma'am","yes"],["Yessir","yes"],["Sure thing","yes"],["I can do it","yes"],["no problem","yes"],["no worries I got it","yes"],["sin problema","yes"],["of course","yes"],["k","yes"],
+["no","no"],["No sorry","no"],["nope","no"],["nah","no"],["can't","no"],["I can't today","no"],["cant sorry","no"],["not today","no"],["I'm busy","no"],["im off today sorry","no"],
+["no puedo","no"],["no puedo hoy","no"],["lo siento no puedo","no"],["no gracias","no"],["estoy ocupada","no"],["pass","no"],["sorry I have class","no"],["I'm sick","no"],["👎","no"],["nooo","no"],
+["yes but only till 9","conditional"],["ok but I can't get there till 6","conditional"],["I can if I leave at 8","conditional"],["i can come at 5","conditional"],["only if I can leave early","conditional"],["can I come in an hour?","conditional"],["si pero solo hasta las 8","conditional"],["puedo pero llego tarde","conditional"],["puedo a las 6","conditional"],["si me pagan doble","conditional"],
+["yeah after my class at 5","conditional"],["maybe after 6","conditional"],["I can do 4 to 8","conditional"],["si, pero no puedo cerrar","conditional"],["yes if it's not closing","conditional"],
+["who is this","unclear"],["quien es","unclear"],["what time?","unclear"],["a que hora?","unclear"],["how much extra","unclear"],["cuanto pagan","unclear"],["maybe","unclear"],["tal vez","unclear"],["idk","unclear"],["no se","unclear"],
+["let me check","unclear"],["dejame ver","unclear"],["lol","unclear"],["?","unclear"],["hmm","unclear"],["i'll let you know","unclear"],["te aviso","unclear"],["ask Jose","unclear"],["yes no idk","unclear"],["creo que si","unclear"],
+["ok?","unclear"],["yes?","unclear"],["probably","unclear"],["I might","unclear"],["wrong number","unclear"]
+]

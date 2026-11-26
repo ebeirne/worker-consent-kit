@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html{color-scheme:light}body{margin:0;font:14px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
+<title>Worker Pay Check</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Mono:wght@400;600&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout: one phone column. Question, four inputs, the answer printed like a pay stub line, then what to keep and what to do. Same family as Shift Change Texts, seen from the worker's side. */
+:root{--bg:#eef0ec;--fg:#16201a;--muted:#55605a;--line:#cdd6cf;--stub:#ffffff;--green:#1d6b4a;--on-green:#ffffff;--field:#ffffff;--warn:#8a5a00;
+--display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;--body:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;--mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#111712;--fg:#e7ede8;--muted:#9aa89f;--line:#2b3630;--stub:#19211c;--green:#6fd3a5;--on-green:#08201a;--field:#17201b;--warn:#e7b65c;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#111712;--fg:#e7ede8;--muted:#9aa89f;--line:#2b3630;--stub:#19211c;--green:#6fd3a5;--on-green:#08201a;--field:#17201b;--warn:#e7b65c;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font:400 16px/1.5 var(--body);padding-block:28px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+main{max-width:640px;margin:0 auto;display:grid;gap:30px;min-width:0}
+section{display:grid;gap:14px;min-width:0}
+h1{font:700 clamp(40px,10vw,58px)/.98 var(--display);margin:0;text-wrap:balance}
+h2{font:700 26px/1.1 var(--display);margin:0}
+p{margin:0;max-width:62ch}
+.muted{color:var(--muted)}.small{font-size:14px}
+a{color:inherit;text-underline-offset:3px}
+label{display:grid;gap:5px;font-size:14px;font-weight:500;min-width:0}
+input,select{font:400 16px var(--body);color:inherit;width:100%;min-width:0;padding:11px 12px;border:1px solid var(--line);border-radius:3px;background:var(--field)}
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
+.check{display:flex;gap:10px;align-items:center;font-weight:400;font-size:15px}
+.check input{width:20px;height:20px;flex:none;accent-color:var(--green)}
+button{font:500 15px var(--body);color:inherit;cursor:pointer;border:1px solid var(--fg);background:transparent;padding:8px 14px;border-radius:3px;min-height:42px}
+:focus-visible{outline:3px solid var(--green);outline-offset:2px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.tag{font:600 12px/1.4 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--green)}
+.stub{background:var(--stub);border:1px solid var(--line);border-left:6px solid var(--green);padding:20px 18px;display:grid;gap:10px;font-family:var(--mono)}
+.stub .lbl{color:var(--muted);font-size:14px}
+.amt{font:600 52px/1 var(--mono);color:var(--green);font-variant-numeric:tabular-nums}
+.why{font:400 15px/1.5 var(--body)}
+.warn{font:400 15px/1.5 var(--body);color:var(--warn)}
+ul{margin:0;padding-left:20px;display:grid;gap:8px;max-width:62ch}
+</style>
+</head>
+<body>
+<main>
+<section>
+  <div class="top"><span class="tag">NYC fast food · Fair Workweek</span><button type="button" id="lang"></button></div>
+  <h1 id="h1"></h1>
+  <p class="muted" id="lede"></p>
+</section>
+<section>
+  <label id="l-what"><span id="t-what"></span><select id="kind"></select></label>
+  <div class="row">
+    <label><span id="t-told"></span><input type="date" id="told"></label>
+    <label><span id="t-first"></span><input type="date" id="first"></label>
+  </div>
+  <label class="check"><input type="checkbox" id="ot"><span id="t-ot"></span></label>
+  <label class="check"><input type="checkbox" id="em"><span id="t-em"></span></label>
+</section>
+<section aria-live="polite">
+  <div class="stub"><span class="lbl" id="t-owed"></span><span class="amt" id="amt"></span><p class="why" id="why"></p><p class="warn" id="consent"></p></div>
+</section>
+<section>
+  <h2 id="t-keep"></h2><ul id="keep"></ul>
+  <h2 id="t-next"></h2><ul id="next"></ul>
+  <p class="small muted" id="fine"></p>
+  <p class="small"><a id="faq" href="https://www.nyc.gov/assets/dca/downloads/pdf/workers/FAQs-FairWorkweek-FastFood.pdf"></a></p>
+</section>
+</main>
+<script>
+(function(){
+var T={"en": {"title": "Worker Pay Check", "h1": "Did the store owe you extra?", "lede": "For fast-food workers in New York City. Pick what happened to your schedule. See what extra pay the city says you are owed, and what to keep.", "what": "What happened?", "told": "The day the store told you", "first": "First day of that week's posted schedule", "ot": "The extra time was overtime for me (over 40 hours that week)", "em": "The store had an emergency (power out, weather, a city order)", "owed": "Extra pay the city says you are owed", "none": "No extra pay owed for this one.", "keep": "Keep these", "keepl": ["A screenshot of the text or message about the change", "Your posted schedule for that week", "The pay stub that should show the extra pay"], "next": "If it is not on your check", "nextl": ["Ask your manager in writing, by text is fine. Keep their answer.", "You can contact the city's Department of Consumer and Worker Protection: call 311 and ask for Fair Workweek.", "Asking about your rights is protected. Your employer is not allowed to punish you for it."], "consent": "The store also needed your yes in writing for this change, before it happened or within 15 minutes after. If you never agreed in writing, say so when you contact the city.", "fine": "A guide, not legal advice. Based on the city's Fast Food Fair Workweek FAQ. Rules differ outside New York City and outside fast food.", "faq": "Read the city's FAQ", "lang": "Español", "kinds": [["cover", "They asked me to cover someone's shift"], ["late", "They asked me to stay late"], ["extra", "They added hours to my shift"], ["move", "They moved my shift (same hours)"], ["cut", "They cut or canceled my hours"], ["clopen", "I worked a closing shift, then an opening shift less than 11 hours later"], ["asked", "I asked for the change myself"], ["trade", "I traded shifts with a coworker"]], "why": {"cover": "You were asked, so the extra pay is owed even if you were happy to do it.", "late": "You were asked to stay, so the extra pay is owed even if you agreed.", "extra": "Added hours count, even if you wanted them.", "move": "Moving a shift counts as a change even when the hours stay the same.", "cut": "Cutting paid time with short notice costs the store more the later it tells you.", "clopen": "A close followed by an open less than 11 hours apart pays $100 extra, and needs your written yes.", "asked": "Changes you ask for owe nothing extra. Keep your own message asking for it.", "trade": "Trades workers arrange themselves owe nothing extra, if both of you agreed in writing."}, "why_ot": "Added time already paid as overtime owes no extra on top.", "why_em": "Changes forced by a real emergency owe nothing extra. Write down what the emergency was.", "why_far": "You were told more than 14 days ahead, so nothing extra is owed."}, "es": {"title": "Worker Pay Check", "h1": "¿Te debían pago extra?", "lede": "Para trabajadores de comida rápida en la ciudad de Nueva York. Elige qué pasó con tu horario. Mira cuánto pago extra dice la ciudad que te deben y qué debes guardar.", "what": "¿Qué pasó?", "told": "El día que la tienda te avisó", "first": "Primer día del horario publicado de esa semana", "ot": "El tiempo extra fue horas extras para mí (más de 40 horas esa semana)", "em": "La tienda tuvo una emergencia (sin luz, mal tiempo, una orden de la ciudad)", "owed": "Pago extra que la ciudad dice que te deben", "none": "No se debe pago extra por esto.", "keep": "Guarda esto", "keepl": ["Una captura del mensaje sobre el cambio", "Tu horario publicado de esa semana", "El talón de pago donde debe salir el pago extra"], "next": "Si no sale en tu cheque", "nextl": ["Pregúntale a tu gerente por escrito; un mensaje de texto sirve. Guarda su respuesta.", "Puedes contactar al Departamento de Protección del Consumidor y del Trabajador: llama al 311 y pide Fair Workweek.", "Preguntar por tus derechos está protegido. Tu empleador no puede castigarte por eso."], "consent": "La tienda también necesitaba tu sí por escrito para este cambio, antes de que pasara o hasta 15 minutos después. Si nunca aceptaste por escrito, dilo cuando contactes a la ciudad.", "fine": "Es una guía, no consejo legal. Basada en las preguntas frecuentes de la ciudad sobre Fair Workweek para comida rápida. Las reglas cambian fuera de la ciudad y fuera de la comida rápida.", "faq": "Lee las preguntas frecuentes de la ciudad (en inglés)", "lang": "English", "kinds": [["cover", "Me pidieron cubrir el turno de alguien"], ["late", "Me pidieron quedarme más tarde"], ["extra", "Me agregaron horas a mi turno"], ["move", "Me movieron el turno (mismas horas)"], ["cut", "Me recortaron o cancelaron horas"], ["clopen", "Trabajé un cierre y luego una apertura con menos de 11 horas entre ellos"], ["asked", "Yo pedí el cambio"], ["trade", "Cambié turno con un compañero"]], "why": {"cover": "Te lo pidieron, así que se debe el pago extra aunque aceptaras con gusto.", "late": "Te pidieron quedarte, así que se debe el pago extra aunque aceptaras.", "extra": "Las horas agregadas cuentan, aunque las quisieras.", "move": "Mover un turno cuenta como cambio aunque las horas sean las mismas.", "cut": "Recortar tiempo pagado con poco aviso le cuesta más a la tienda mientras más tarde te avise.", "clopen": "Un cierre seguido de una apertura con menos de 11 horas entre ellos paga $100 extra y necesita tu sí por escrito.", "asked": "Los cambios que tú pides no deben nada extra. Guarda tu propio mensaje pidiéndolo.", "trade": "Los cambios que arreglan los trabajadores no deben nada extra, si los dos aceptaron por escrito."}, "why_ot": "El tiempo agregado que ya se paga como horas extras no debe nada más encima.", "why_em": "Los cambios por una emergencia real no deben nada extra. Anota cuál fue la emergencia.", "why_far": "Te avisaron con más de 14 días, así que no se debe nada extra."}};
+var $=function(i){return document.getElementById(i)};
+function tier(first,told){var d=Math.round((Date.parse(first+"T00:00:00Z")-Date.parse(told+"T00:00:00Z"))/86400000);return d>14?0:d>7?1:d>1?2:3}
+function owed(kind,first,told,ot,em){
+  if(kind==="asked"||kind==="trade")return 0;
+  if(kind==="clopen")return 100;
+  if(em)return 0;
+  var t=tier(first,told);
+  if(kind==="cut")return [0,20,45,75][t];
+  if(ot&&kind!=="move")return 0;
+  return [0,10,15,15][t];
+}
+
+var L="en";try{var q=localStorage.getItem("wpc-lang");if(q==="es")L="es"}catch(e){}
+var iso=function(d){var z=new Date(d.getTime()-d.getTimezoneOffset()*60000);return z.toISOString().slice(0,10)};
+var now=new Date(),mon=new Date(now);mon.setDate(now.getDate()-((now.getDay()+6)%7));$("first").value=iso(mon);$("told").value=iso(now);
+function list(id,arr){var u=$(id);u.textContent="";arr.forEach(function(x){var li=document.createElement("li");li.textContent=x;u.append(li)})}
+function words(){var t=T[L];document.documentElement.lang=L;$("lang").textContent=t.lang;$("h1").textContent=t.h1;$("lede").textContent=t.lede;$("t-what").textContent=t.what;$("t-told").textContent=t.told;$("t-first").textContent=t.first;$("t-ot").textContent=t.ot;$("t-em").textContent=t.em;$("t-owed").textContent=t.owed;$("t-keep").textContent=t.keep;$("t-next").textContent=t.next;$("fine").textContent=t.fine;$("faq").textContent=t.faq;list("keep",t.keepl);list("next",t.nextl);
+ var k=$("kind"),v=k.value||"cover";k.textContent="";t.kinds.forEach(function(x){var o=document.createElement("option");o.value=x[0];o.textContent=x[1];k.append(o)});k.value=v;draw()}
+function draw(){var t=T[L],k=$("kind").value,first=$("first").value,told=$("told").value,ot=$("ot").checked,em=$("em").checked;if(!first||!told)return;
+ var a=owed(k,first,told,ot,em);$("amt").textContent=a>0?"$"+a+".00":"$0";
+ var w=t.why[k];if(a===0&&!/asked|trade/.test(k)){w=em&&k!=="clopen"?t.why_em:(ot&&k!=="move"&&k!=="cut"?t.why_ot:t.why_far)}
+ $("why").textContent=a===0&&/asked|trade/.test(k)?t.why[k]:(a===0?w:t.why[k]);
+ var needs=/cover|late|extra|move|clopen/.test(k);$("consent").textContent=needs?t.consent:"";$("consent").hidden=!needs}
+["kind","first","told","ot","em"].forEach(function(id){$(id).addEventListener("change",draw);$(id).addEventListener("input",draw)});
+$("lang").onclick=function(){L=L==="en"?"es":"en";try{localStorage.setItem("wpc-lang",L)}catch(e){}words()};
+window.__owed=owed;words();
+})();
+</script>
+</body>
+</html>

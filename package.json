@@ -1,0 +1,10 @@
+{
+  "name": "worker-consent-kit",
+  "version": "0.1.0",
+  "description": "Open tools so an hourly worker's yes or no to a schedule change is read honestly and paid correctly: a bilingual reply reader with public test sets, and New York City's Fair Workweek extra-pay rules as tested code.",
+  "license": "MIT",
+  "private": false,
+  "scripts": {
+    "test": "node test/payrules.test.js && node eval/score.js data/tuning.json && node eval/score.js data/heldout.json && node eval/score.js data/set2.json"
+  }
+}
